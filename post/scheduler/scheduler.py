@@ -23,9 +23,7 @@ def save_job(job: dict):
 
 async def schedule_post(job: dict):
     # Convert ISO string → timezone-aware datetime (UTC)
-    run_at = datetime.fromisoformat(
-        job["run_at"].replace("Z", "+00:00")
-    )
+    run_at = job["run_at"]
 
     # Make now timezone-aware (UTC)
     now = datetime.now(timezone.utc)

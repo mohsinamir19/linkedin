@@ -25,13 +25,13 @@ async def process_post_request(user_conversation: str):
             "mode": data.mode,
             "caption": data.caption,
             "file_path": data.file_path,
-            "scheduled_time": data.scheduled_time
+            "run_at": data.scheduled_time
         }
         
         if data.mode == "schedule":
             # Call your existing scheduler logic here
             save_job(response)
-            pass 
+            await schedule_post(response)
             
         return response
         # --- DISPATCH LOGIC END ---
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     test_input = (
         "I want to create a post about the future of AI Agents in 2026. "
         "Use the image at C:\\Users\\user\\Downloads\\download.jpeg. "
-        "Please schedule this for today 12:30 at . I am located in the pakistan."
+        "Please schedule this for today 4:40 pm . I am located in the pakistan."
     )
 
     print("\n🚀 STARTING FULL SYSTEM INTEGRATION TEST...")
