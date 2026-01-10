@@ -1,26 +1,36 @@
-import asyncio
 import json
 from agents import Runner
-from analytics_agent import analytics_agent
+# Assuming your agent file is named analytics_agent.py inside the analytics folder
+from analytics.analytics_agent import analytics_agent
 
-# Tailored input for the Analytics Agent
-input_str = json.dumps({
-    "question": "When is the best time for me to post to get the most comments and likes?",
-})
-
-async def run():
-    print("--- Starting Analytics Agent ---")
+async def process_analytics_request(query: str):
+    """
+    Wraps the query in the JSON structure expected by the Analytics Agent,
+    runs the agent, and returns a structured dictionary.
+    """
     
-    # Using the SDK Runner to execute the agent logic
-    result = await Runner.run(
-        analytics_agent,
-        input_str
-    )
+    # 1. Prepare the input exactly how the agent expects it
+    input_payload = json.dumps({
+        "question": query
+    })
 
-    # Output the structured JSON response
-    print("\nFINAL INSIGHTS:")
-    print(result.final_output)
+    # 2. Run the agent
+    result = await Runner.run(analytics_agent, input_payload)
+    output = result.final_output.strip()
 
-if __name__ == "__main__":
-    # Ensure you have an analytics.json file in the root before running
-    asyncio.run(run())
+    # 3. Parse the result
+    try:
+        # The agent is instructed to return ONLY JSON
+        insights = json.loads(output)
+        
+        return {
+            "status": "completed",
+            "decision": insights
+        }
+
+    except json.JSONDecodeError:
+        # Fallback if the model outputs text instead of JSON
+        return {
+            "status": "incomplete",
+            "reply": output
+        }

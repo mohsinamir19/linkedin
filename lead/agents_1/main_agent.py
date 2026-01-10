@@ -1,7 +1,7 @@
 # agents/main_agent.py
 from agents import Agent,OpenAIChatCompletionsModel
-from tools.linkedin_search_tool import linkedin_search_tool
-from agents_1.reasoning_agent import reasoning_agent_tool
+from lead.tools.linkedin_search_tool import linkedin_search_tool
+from lead.agents_1.reasoning_agent import reasoning_agent_tool
 import os 
 from openai import AsyncOpenAI
 from dotenv import load_dotenv

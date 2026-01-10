@@ -1,6 +1,6 @@
 # agents/reasoning_agent.py
 from agents import Agent,OpenAIChatCompletionsModel
-from schemas import ScoredLead
+from lead.schemas import ScoredLead
 import os 
 from openai import AsyncOpenAI
 from dotenv import load_dotenv

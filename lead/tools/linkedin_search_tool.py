@@ -4,7 +4,7 @@ import asyncio
 from dataclasses import asdict
 from playwright.async_api import async_playwright
 from agents import function_tool
-from schemas import SearchRequest, RawLinkedInProfile
+from lead.schemas import SearchRequest, RawLinkedInProfile
 
 
 @function_tool

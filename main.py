@@ -1,6 +1,9 @@
 import uvicorn
 from fastapi import FastAPI
 from post.api import router as post_router
+from analytics.api import router as analytics_router
+from lead.api import router as lead_router
+
 
 app = FastAPI(title="LinkedIn AI Backend")
 
@@ -12,7 +15,12 @@ async def root():
 async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
+
 app.include_router(post_router)
+
+app.include_router(analytics_router)
+
+app.include_router(lead_router)
 
 def run():
     uvicorn.run(
