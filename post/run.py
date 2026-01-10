@@ -1,29 +1,61 @@
-# post/run.py
 from agents import Runner
-from post.agents_1.post_agent import post_agent, handle_post_request
-import json
+import asyncio
+# from post.agents_1.orchestrator import orchestrator_agent
+from agents_1.orchestrator import orchestrator_agent
+# from post.schemas import LinkedInPostRequest
+from schemas import LinkedInPostRequest
+# Import your existing scheduler/tools if needed for dispatch
+# from post.scheduler.scheduler import save_job, schedule_post 
+from scheduler.scheduler import save_job, schedule_post 
 
-async def process_post_request(conversation: str):
-    result = await Runner.run(post_agent, conversation)
-    output = result.final_output.strip()
+async def process_post_request(user_conversation: str):
+    print(f"\n--- Processing: {user_conversation[:50]}... ---")
+    
+    result = await Runner.run(orchestrator_agent, user_conversation)
+    
+    # Check if final output is our Pydantic Schema
+    if isinstance(result.final_output, LinkedInPostRequest):
+        data = result.final_output
+        print("\n✅ Valid Structured Output Received")
+        
+        # --- DISPATCH LOGIC START ---
+        # This replaces your old handle_post_request
+        response = {
+            "status": "success",
+            "mode": data.mode,
+            "caption": data.caption,
+            "file_path": data.file_path,
+            "scheduled_time": data.scheduled_time
+        }
+        
+        if data.mode == "schedule":
+            # Call your existing scheduler logic here
+            save_job(response)
+            pass 
+            
+        return response
+        # --- DISPATCH LOGIC END ---
 
-    try:
-        decision = json.loads(output)
-    except json.JSONDecodeError:
+    else:
+        # Conversation incomplete, return agent's question
         return {
             "status": "incomplete",
-            "reply": output
+            "reply": result.final_output
         }
-
-    execution_result = await handle_post_request(
-        caption=decision["caption"],
-        file_path=decision.get("file_path"),
-        mode=decision["mode"],
-        scheduled_time=decision.get("scheduled_time")
+        
+if __name__ == "__main__":
+    # This test case provides ALL info at once to see the chain-reaction:
+    # 1. Orchestrator receives input
+    # 2. Orchestrator calls Caption Tool (polishing)
+    # 3. Orchestrator calls Time Tool (parsing 'tomorrow at 3pm')
+    # 4. Orchestrator hands off to Structured Agent
+    # 5. Pydantic validation triggers
+    
+    test_input = (
+        "I want to create a post about the future of AI Agents in 2026. "
+        "Use the image at C:\\Users\\user\\Downloads\\download.jpeg. "
+        "Please schedule this for today 12:30 at . I am located in the pakistan."
     )
 
-    return {
-        "status": "completed",
-        "decision": decision,
-        "execution": execution_result
-    }
+    print("\n🚀 STARTING FULL SYSTEM INTEGRATION TEST...")
+    asyncio.run(process_post_request(test_input))

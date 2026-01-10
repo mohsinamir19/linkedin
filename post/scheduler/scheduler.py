@@ -2,11 +2,11 @@
 import asyncio
 import json
 from datetime import datetime, timezone
-from post.tools.linkedin_post_tool import linkedin_post_tool
+# from post.tools.linkedin_post_tool import linkedin_post_tool
+from tools.linkedin_post_tool import linkedin_post_tool
 import os
 
-SCHEDULE_FILE = r"C:\Users\sbato\OneDrive\Desktop\linkedin\post\scheduler\scheduled_jobs.json"
-
+SCHEDULE_FILE = r"D:\linkedin\post\scheduler\scheduled_jobs.json"
 
 def save_job(job: dict):
     try:
