@@ -1,51 +1,61 @@
-# post/api.py
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
-# Ensure this EXACT line is used:
+import json
+
+# Absolute imports to ensure it works within the project structure
 from post.run import process_post_request
 
 router = APIRouter(prefix="/agents/post", tags=["Post Agent"])
 
 # ------------------------
-# Request model
+# Request Model
 # ------------------------
 class PostChatRequest(BaseModel):
-    message: str               # new user message
-    session_id: Optional[str]  # optional session identifier
+    message: str               # The user's prompt/message
+    session_id: Optional[str] = "default"
 
 # ------------------------
-# Simple in-memory conversation store
+# Session Memory
 # ------------------------
-# This stores all messages per session_id
-# In production, replace with DB or Redis
+# Stores conversation logs to maintain context for the Orchestrator
 conversations = {}
 
-# ------------------------
-# Chat endpoint
-# ------------------------
 @router.post("/chat")
 async def chat_with_post_agent(payload: PostChatRequest):
-    session = payload.session_id or "default"
+    session = payload.session_id
 
-    # Initialize session history if not exists
+    # Initialize session history
     if session not in conversations:
         conversations[session] = []
 
-    # Append user message to history
+    # 1. Append User Input to History
     conversations[session].append(f"User: {payload.message}")
+    
+    # 2. Compile full conversation string for the Orchestrator
+    full_context = "\n".join(conversations[session])
 
-    # Combine full conversation to send to AI
-    full_conversation = "\n".join(conversations[session])
+    try:
+        # 3. Call the run logic
+        result = await process_post_request(full_context)
 
-    # Get AI response
-    ai_response = await process_post_request(full_conversation)
+        # 4. Handle Response logic
+        if result["status"] == "success":
+            # If successful, the AI completed the task. 
+            # We clear or mark the conversation as finished.
+            ai_reply = f"Post successfully handled in mode: {result['mode']}"
+            conversations[session].append(f"AI: {ai_reply}")
+        else:
+            # If incomplete, the AI is asking for missing info (like time or file path)
+            ai_reply = result["reply"]
+            conversations[session].append(f"AI: {ai_reply}")
 
-    # Append AI response to history
-    conversations[session].append(f"AI: {ai_response}")
+        return {
+            "session_id": session,
+            "status": result["status"],
+            "response": result,
+            "history": conversations[session]
+        }
 
-    return {
-        "session_id": session,
-        "response": ai_response,
-        "conversation": conversations[session]  # optional full conversation
-    }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Post Agent Error: {str(e)}")

@@ -1,25 +1,59 @@
 from agents import Runner
 import asyncio
+import logging
+from datetime import datetime
+
 # from post.agents_1.orchestrator import orchestrator_agent
 from agents_1.orchestrator import orchestrator_agent
 # from post.schemas import LinkedInPostRequest
 from schemas import LinkedInPostRequest
-# Import your existing scheduler/tools if needed for dispatch
 # from post.scheduler.scheduler import save_job, schedule_post 
 from scheduler.scheduler import save_job, schedule_post 
 
+
+# ------------------------
+# LOGGING SETUP
+# ------------------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
 async def process_post_request(user_conversation: str):
-    print(f"\n--- Processing: {user_conversation[:50]}... ---")
-    
-    result = await Runner.run(orchestrator_agent, user_conversation)
-    
-    # Check if final output is our Pydantic Schema
-    if isinstance(result.final_output, LinkedInPostRequest):
-        data = result.final_output
-        print("\n✅ Valid Structured Output Received")
-        
-        # --- DISPATCH LOGIC START ---
-        # This replaces your old handle_post_request
+    logger.info("➡️ process_post_request started")
+    logger.info(f"🧾 Raw user input: {user_conversation}")
+
+    try:
+        logger.info("🤖 Calling Runner.run()")
+        result = await Runner.run(orchestrator_agent, user_conversation)
+        logger.info("✅ Runner.run() completed")
+
+    except Exception as e:
+        logger.exception("❌ Runner.run() FAILED")
+        return {
+            "status": "error",
+            "error": str(e)
+        }
+
+    # ------------------------
+    # RESULT INSPECTION
+    # ------------------------
+    logger.info(f"🔍 result type: {type(result)}")
+
+    final_output = getattr(result, "final_output", None)
+    logger.info(f"🔍 final_output type: {type(final_output)}")
+    logger.info(f"🔍 final_output value: {final_output}")
+
+    # ------------------------
+    # STRUCTURED OUTPUT CHECK
+    # ------------------------
+    if isinstance(final_output, LinkedInPostRequest):
+        logger.info("✅ final_output is LinkedInPostRequest (Pydantic validated)")
+
+        data = final_output
+
         response = {
             "status": "success",
             "mode": data.mode,
@@ -27,35 +61,47 @@ async def process_post_request(user_conversation: str):
             "file_path": data.file_path,
             "run_at": data.scheduled_time
         }
-        
+
+        logger.info(f"📦 Response payload prepared: {response}")
+
         if data.mode == "schedule":
-            # Call your existing scheduler logic here
-            save_job(response)
-            await schedule_post(response)
-            
+            try:
+                logger.info("⏰ Scheduling mode detected")
+                save_job(response)
+                logger.info("💾 Job saved successfully")
+
+                logger.info("🚀 Calling schedule_post()")
+                await schedule_post(response)
+                logger.info("✅ schedule_post() completed")
+
+            except Exception as e:
+                logger.exception("❌ Scheduling failed")
+                return {
+                    "status": "error",
+                    "error": str(e)
+                }
+
         return response
-        # --- DISPATCH LOGIC END ---
 
     else:
-        # Conversation incomplete, return agent's question
+        logger.warning("⚠️ final_output is NOT LinkedInPostRequest")
+        logger.warning("🔁 Agent is requesting more input")
+
         return {
             "status": "incomplete",
-            "reply": result.final_output
+            "reply": final_output
         }
-        
+
+
+# ------------------------
+# CLI TEST ENTRY POINT
+# ------------------------
 if __name__ == "__main__":
-    # This test case provides ALL info at once to see the chain-reaction:
-    # 1. Orchestrator receives input
-    # 2. Orchestrator calls Caption Tool (polishing)
-    # 3. Orchestrator calls Time Tool (parsing 'tomorrow at 3pm')
-    # 4. Orchestrator hands off to Structured Agent
-    # 5. Pydantic validation triggers
-    
     test_input = (
-        "I want to create a post about the future of AI Agents in 2026. "
+        "I want to create a post about the future of AI Agents in 2026. AI agents will transform industries of medical billing, I carete the agents. whihc handles the billing process of medical filed and the doctor  "
         "Use the image at C:\\Users\\user\\Downloads\\download.jpeg. "
-        "Please schedule this for today 5:15 pm . I am located in the pakistan."
+        "Please schedule this for today 7:39pm Pakistan timezone"
     )
 
-    print("\n🚀 STARTING FULL SYSTEM INTEGRATION TEST...")
+    logger.info("🚀 STARTING FULL SYSTEM INTEGRATION TEST")
     asyncio.run(process_post_request(test_input))
