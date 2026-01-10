@@ -5,8 +5,9 @@ from datetime import datetime, timezone
 # from post.tools.linkedin_post_tool import linkedin_post_tool
 from tools.linkedin_post_tool import linkedin_post_tool
 import os
+from datetime import datetime, timezone
 
-SCHEDULE_FILE = r"D:\linkedin\post\scheduler\scheduled_jobs.json"
+SCHEDULE_FILE = r"C:\Users\sbato\OneDrive\Desktop\linkedin\linkedin\post\scheduler\scheduled_jobs.json"
 
 def save_job(job: dict):
     try:
@@ -23,7 +24,10 @@ def save_job(job: dict):
 
 async def schedule_post(job: dict):
     # Convert ISO string → timezone-aware datetime (UTC)
-    run_at = job["run_at"]
+    
+
+    run_at = datetime.fromisoformat(job["run_at"])  # Converts ISO string to datetime
+
 
     # Make now timezone-aware (UTC)
     now = datetime.now(timezone.utc)

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     test_input = (
         "I want to create a post about the future of AI Agents in 2026. "
         "Use the image at C:\\Users\\user\\Downloads\\download.jpeg. "
-        "Please schedule this for today 4:40 pm . I am located in the pakistan."
+        "Please schedule this for today 5:15 pm . I am located in the pakistan."
     )
 
     print("\n🚀 STARTING FULL SYSTEM INTEGRATION TEST...")
