@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from post.api import router as post_router
 from analytics.api import router as analytics_router
 from lead.api import router as lead_router
-from post.api import router as post_router
 
 
 app = FastAPI(title="LinkedIn AI Backend")
@@ -22,7 +21,6 @@ app.include_router(post_router)
 app.include_router(analytics_router)
 
 app.include_router(lead_router)
-
 
 def run():
     uvicorn.run(
