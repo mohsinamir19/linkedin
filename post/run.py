@@ -1,20 +1,18 @@
 # run.py
 from agents import Runner
-from post.agents_1.orchestrator import orchestrator_agent
-from post.schemas import LinkedInPostRequest
-from post.scheduler.scheduler import save_job, schedule_post
-#
+from agents_1.orchestrator import orchestrator_agent
+from schemas import LinkedInPostRequest
+from scheduler.scheduler import save_job, schedule_post
 
-async def process_post_request(message: str, history=None):
+async def process_post_request(message: str):
     print(f"\n--- Processing: {message[:50]}... ---")
 
+    # Runner.run ACCEPTS ONLY (agent, message)
     result = await Runner.run(
         orchestrator_agent,
-        message,
-        history=history  # <--- pass full conversation
+        message
     )
 
-    # Structured output received
     if isinstance(result.final_output, LinkedInPostRequest):
         data = result.final_output
         response = {
@@ -31,7 +29,6 @@ async def process_post_request(message: str, history=None):
 
         return response
 
-    # Not finished — agent is asking for more info
     return {
         "status": "incomplete",
         "reply": result.final_output

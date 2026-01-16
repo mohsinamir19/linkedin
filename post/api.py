@@ -10,14 +10,14 @@ class PostChatRequest(BaseModel):
     message: str
     session_id: Optional[str]
 
-# Conversation memory (in production: Redis/DB)
+# Conversation store (session memory)
 conversations: Dict[str, List[Dict]] = {}
 
 @router.post("/chat")
 async def chat_with_post_agent(payload: PostChatRequest):
     session = payload.session_id or "default"
 
-    # Create session history if not exists
+    # Initialize session
     if session not in conversations:
         conversations[session] = []
 
@@ -27,13 +27,16 @@ async def chat_with_post_agent(payload: PostChatRequest):
         "content": payload.message
     })
 
-    # Send ONLY latest message + full structured history to run.py
-    ai_response = await process_post_request(
-        message=payload.message,
-        history=conversations[session]
-    )
+    # --- BUILD multi-turn conversation string for orchestrator ---
+    convo_text = ""
+    for msg in conversations[session]:
+        role = "User" if msg["role"] == "user" else "AI"
+        convo_text += f"{role}: {msg['content']}\n"
 
-    # Add AI response to history
+    # SEND FULL CONVERSATION to Runner
+    ai_response = await process_post_request(convo_text.strip())
+
+    # Add AI response to memory
     conversations[session].append({
         "role": "assistant",
         "content": ai_response
