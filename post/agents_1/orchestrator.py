@@ -1,10 +1,10 @@
 from agents import Agent
-# from post.tools.caption_tool import model, caption_writer_tool
-# from post.tools.time_tool import parse_time_tool
-# from post.agents_1.structured_agent import structured_agent
-from agents_1.structured_agent import structured_agent
-from tools.caption_tool import model, caption_writer_tool
-from tools.time_tool import parse_time_tool
+from post.tools.caption_tool import model, caption_writer_tool
+from post.tools.time_tool import parse_time_tool
+from post.agents_1.structured_agent import structured_agent
+# from agents_1.structured_agent import structured_agent
+# from tools.caption_tool import model, caption_writer_tool
+# from tools.time_tool import parse_time_tool
 
 orchestrator_agent = Agent(
     name="Orchestrator",

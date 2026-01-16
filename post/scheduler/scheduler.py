@@ -1,45 +1,59 @@
 # scheduler/scheduler.py
 import asyncio
 import json
-from datetime import datetime, timezone
-# from post.tools.linkedin_post_tool import linkedin_post_tool
-from tools.linkedin_post_tool import linkedin_post_tool
+from datetime import datetime
+from post.tools.linkedin_post_tool import linkedin_post_tool
+# from tools.linkedin_post_tool import linkedin_post_tool
 import os
-from datetime import datetime, timezone
 
 SCHEDULE_FILE = r"C:\Users\sbato\OneDrive\Desktop\linkedin\linkedin\post\scheduler\scheduled_jobs.json"
 
+
 def save_job(job: dict):
+    """Save a scheduled job to JSON file."""
+    print("📁 SAVE_JOB: Attempting to save scheduled job")
+
     try:
         with open(SCHEDULE_FILE, "r") as f:
             jobs = json.load(f)
+            print(f"📂 SAVE_JOB: Loaded existing jobs ({len(jobs)})")
     except Exception:
+        print("⚠️ SAVE_JOB: No existing schedule file found or failed to load")
         jobs = []
 
     jobs.append(job)
+    print("➕ SAVE_JOB: Job appended to list")
 
     with open(SCHEDULE_FILE, "w") as f:
         json.dump(jobs, f, indent=2)
+        print("💾 SAVE_JOB: Job saved successfully to JSON file")
 
 
 async def schedule_post(job: dict):
-    # Convert ISO string → timezone-aware datetime (UTC)
-    
+    """Schedule a LinkedIn post based on job['run_at'] in PK time."""
+    print("🗓️ SCHEDULER: Starting schedule_post")
+    print(f"📦 SCHEDULER: Job received → {job}")
 
-    run_at = datetime.fromisoformat(job["run_at"])  # Converts ISO string to datetime
+    # Parse run_at ISO string → timezone-aware datetime
+    run_at = datetime.fromisoformat(job["run_at"])
+    print(f"⏰ SCHEDULER: Parsing run_at time → {run_at.isoformat()}")
 
+    # Use now in same timezone as run_at
+    now = datetime.now(run_at.tzinfo)
+    print(f"🕒 SCHEDULER: Current time → {now.isoformat()}")
 
-    # Make now timezone-aware (UTC)
-    now = datetime.now(timezone.utc)
-
+    # Calculate delay in seconds
     delay = (run_at - now).total_seconds()
+    print(f"⏳ SCHEDULER: Calculated delay → {delay:.2f} seconds")
 
     if delay <= 0:
+        print("❌ SCHEDULER ERROR: Scheduled time is in the past")
         raise ValueError("Scheduled time must be in the future")
 
     print(f"⏳ Waiting {delay:.2f} seconds to post...")
-
     await asyncio.sleep(delay)
+
+    print("🚀 SCHEDULER: Time reached, executing LinkedIn post tool")
 
     # Execute the LinkedIn post
     await linkedin_post_tool(
@@ -49,4 +63,4 @@ async def schedule_post(job: dict):
         file_path=job["file_path"]
     )
 
-    print("✅ Scheduled LinkedIn post executed successfully")
+    print("✅ SCHEDULER: Scheduled LinkedIn post executed successfully")

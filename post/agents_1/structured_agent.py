@@ -1,8 +1,8 @@
 from agents import Agent
-# from post.tools.caption_tool import model # Re-using the model instance
-# from post.schemas import LinkedInPostRequest
-from tools.caption_tool import model # Re-using the model instance
-from schemas import LinkedInPostRequest
+from post.tools.caption_tool import model # Re-using the model instance
+from post.schemas import LinkedInPostRequest
+# from tools.caption_tool import model # Re-using the model instance
+# from schemas import LinkedInPostRequest
 
 structured_agent = Agent(
     name="Structured Output Agent",
