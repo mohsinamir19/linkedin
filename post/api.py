@@ -1,5 +1,5 @@
 # post/api.py
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional
 from agents import SQLiteSession
@@ -11,7 +11,6 @@ class PostChatRequest(BaseModel):
     message: str
     session_id: Optional[str] = "default"
 
-# 🔥 SQLite-backed session store
 sessions: dict[str, SQLiteSession] = {}
 
 def get_session(session_id: str) -> SQLiteSession:
@@ -20,12 +19,16 @@ def get_session(session_id: str) -> SQLiteSession:
     return sessions[session_id]
 
 @router.post("/chat")
-async def chat_with_post_agent(payload: PostChatRequest):
+async def chat_with_post_agent(
+    payload: PostChatRequest,
+    background_tasks: BackgroundTasks   # ✅ added
+):
     session = get_session(payload.session_id)
 
     ai_response = await process_post_request(
         payload.message,
-        session
+        session,
+        background_tasks   # ✅ pass it down
     )
 
     return {
