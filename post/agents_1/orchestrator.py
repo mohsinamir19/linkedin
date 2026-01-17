@@ -19,7 +19,7 @@ orchestrator_agent = Agent(
     1. Raw Caption Idea
     2. Media File Path
     3. Mode ("now" or "schedule")
-    4. IF mode is "schedule": Ask for "When?" and "User's Country?"
+    4. IF mode is "schedule": Ask for "When?" 
 
     ### PHASE 2: PROCESSING (Use Tools)
     - Once you have the raw caption, IMMEDIATELY call `caption_writer_tool` to polish it.

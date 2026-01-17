@@ -2,34 +2,33 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import Optional
+from agents import SQLiteSession
 from post.run import process_post_request
 
 router = APIRouter(prefix="/agents/post", tags=["Post Agent"])
 
 class PostChatRequest(BaseModel):
     message: str
-    session_id: Optional[str]
+    session_id: Optional[str] = "default"
 
-# Optional conversation store (if you want to show history to user)
-conversations = {}
+# 🔥 SQLite-backed session store
+sessions: dict[str, SQLiteSession] = {}
+
+def get_session(session_id: str) -> SQLiteSession:
+    if session_id not in sessions:
+        sessions[session_id] = SQLiteSession(session_id)
+    return sessions[session_id]
 
 @router.post("/chat")
 async def chat_with_post_agent(payload: PostChatRequest):
-    session = payload.session_id or "default"
+    session = get_session(payload.session_id)
 
-    # Store history (optional)
-    if session not in conversations:
-        conversations[session] = []
-    conversations[session].append({"role": "user", "content": payload.message})
-
-    # Send ONLY the latest message to the orchestrator
-    ai_response = await process_post_request(payload.message)
-
-    # Save AI response to conversation (optional)
-    conversations[session].append({"role": "assistant", "content": ai_response})
+    ai_response = await process_post_request(
+        payload.message,
+        session
+    )
 
     return {
-        "session_id": session,
-        "response": ai_response,
-        "conversation": conversations[session]  # optional
+        "session_id": payload.session_id,
+        "response": ai_response
     }
