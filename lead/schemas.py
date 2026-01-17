@@ -53,25 +53,22 @@ class ScoredLead:
     explanation: str
 
 # lead/schemas.py
-from dataclasses import dataclass
+from pydantic import BaseModel, Field
 from typing import List, Optional
 
 # ===============================
 # Structured Lead Output
 # ===============================
 
-@dataclass
-class Lead:
+class Lead(BaseModel):
     name: str
-    linkedin_url: str          # validated URL
+    linkedin_url: str
     role: str
     company: str
     location: str
-    relevance_score: int            # non-default fields first
+    relevance_score: int
     explanation: str
-    connectionDegree: Optional[str] = "N/A"  # default field last
+    connectionDegree: Optional[str] = "N/A"
 
-
-@dataclass
-class LeadsList:
+class LeadsList(BaseModel):
     leads: List[Lead]

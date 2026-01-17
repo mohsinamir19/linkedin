@@ -9,30 +9,29 @@ from agents import Runner
 from lead.agents_1.main_agent import structured_leads_agent 
 
 async def process_lead_request(query_data: dict):
-    """
-    query_data should be a dictionary containing 'filters' and 'limit'.
-    Example: {"filters": {"job_title": "Engineer"}, "limit": 5}
-    """
+    # This calls the Agent
+    # If using pydantic-ai or similar:
+    result = await structured_leads_agent.run(str(query_data))
     
-    # 1. Convert the dict to JSON string for the Agent
-    input_str = json.dumps(query_data)
+    # ❌ OLD BUGGY WAY: 
+    # return {"status": "completed", "reply": result.data.strip()} <-- CRASH!
 
-    # 2. Run the Orchestrator Agent
-    result = await Runner.run(structured_leads_agent , input_str)
-    output = result.final_output.strip()
-
-    try:
-        # The agent returns a JSON array of leads
-        leads_data = json.loads(output)
+    # ✅ NEW FIXED WAY:
+    # Check if the data is already the LeadsList object
+    if hasattr(result.data, 'leads'):
+        # Convert Pydantic/Dataclass to a list of dicts for the API
+        leads_as_dicts = [lead.model_dump() if hasattr(lead, 'model_dump') else lead.__dict__ 
+                         for lead in result.data.leads]
         return {
             "status": "completed",
-            "leads": leads_data
+            "leads": leads_as_dicts
         }
-    except json.JSONDecodeError:
-        return {
-            "status": "incomplete",
-            "reply": output
-        }
+    
+    # Fallback if it returned a string instead of the object
+    return {
+        "status": "completed",
+        "reply": str(result.data).strip()
+    }
 
 # For manual CLI testing
 if __name__ == "__main__":

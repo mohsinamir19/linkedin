@@ -25,7 +25,6 @@ class LeadSearchRequest(BaseModel):
 @router.post("/search")
 async def search_leads(payload: LeadSearchRequest):
     try:
-        # Convert Pydantic model to dict for the runner
         query_data = {
             "filters": payload.filters.model_dump(exclude_none=True),
             "limit": payload.limit
@@ -33,10 +32,20 @@ async def search_leads(payload: LeadSearchRequest):
         
         result = await process_lead_request(query_data)
         
+        # If the agent returned a 'reply' (string) instead of 'leads' (list)
+        # we wrap it so the frontend doesn't crash
+        data_to_return = result.get("leads", [])
+        
+        if not data_to_return and "reply" in result:
+            print(f"🤖 Agent Message: {result['reply']}")
+            # Optional: You could parse the reply string back into a list here if needed
+
         return {
             "session_id": payload.session_id,
-            "status": result["status"],
-            "data": result.get("leads") if result["status"] == "completed" else result.get("reply")
+            "status": result.get("status", "completed"),
+            "data": data_to_return
         }
     except Exception as e:
+        import traceback
+        traceback.print_exc() # This will show you exactly which line crashed in your terminal
         raise HTTPException(status_code=500, detail=str(e))
