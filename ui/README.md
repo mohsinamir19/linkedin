@@ -1,521 +1,289 @@
-# LinkedIn AI Agent - Complete Documentation
+# LinkedIn AI Agent - Frontend
 
-## 🎯 Overview
+A modern SaaS web application for LinkedIn AI Posting & Analytics. This application helps users generate LinkedIn posts using AI, attach media files, schedule posts, analyze performance, and generate leads.
 
-A modern, production-ready **SaaS application** for LinkedIn AI assistance featuring intelligent post creation, performance analytics, and lead generation.
+## Features
 
-**Status**: ✅ **Production Ready**  
-**Tech Stack**: React + TypeScript + Tailwind CSS v4 + Radix UI  
-**Documentation**: Complete & Comprehensive
+### 🚀 Post Agent
+- **AI-Powered Post Generation**: Create engaging LinkedIn posts with AI assistance
+- **Chat Interface**: Conversational interface for post creation
+- **LinkedIn Post Preview**: Real-time preview of how your post will appear
+- **Scheduling**: Schedule posts for optimal engagement times
+- **Media Upload**: Attach images and files to your posts
 
----
+### 📊 Analyzer Agent
+- **Performance Analytics**: Deep insights into post performance
+- **AI Insights**: Get actionable recommendations to improve engagement
+- **Best Time Analysis**: Find optimal posting times based on your data
+- **Content Strategy**: Understand what content resonates with your audience
+- **Real-time Metrics**: Live KPI tracking and trend analysis
 
-## 🚀 Quick Start
+### 🎯 Leads Agent
+- **Advanced Lead Search**: Filter by job title, location, industry, and keywords
+- **Profile Scanning**: AI-powered LinkedIn profile discovery
+- **Export Capabilities**: Download leads in CSV or JSON format
+- **Connection Insights**: See connection degree and relationship strength
 
-```bash
-# Install dependencies
-npm install
+## Tech Stack
 
-# Start development server
-npm run dev
+- **React** with TypeScript
+- **Tailwind CSS** for styling
+- **Vite** for build tooling
+- **Lucide React** for icons
+- **FastAPI** backend integration
 
-# Build for production
-npm run build
-```
+## Setup Instructions
 
-Open [http://localhost:5173](http://localhost:5173) to view the application.
+### Prerequisites
+- Node.js 18+ installed
+- FastAPI backend server running (see backend setup)
 
----
+### Installation
 
-## 📚 Documentation Suite
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd linkedin-ai-agent
+   ```
 
-This project includes **5 comprehensive documentation files** covering every aspect of the design and implementation:
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-### 1. **DESIGN_SYSTEM.md** (1,000+ lines)
-Complete design system specification including:
-- Layout architecture and page structures
-- Complete component library (11 custom + 30+ UI components)
-- Color palette with hex codes and usage guidelines
-- Typography system with scales and hierarchy
-- Spacing system and layout patterns
-- Interaction patterns and micro-animations
-- Responsive design specifications
-- Accessibility standards (WCAG AA)
-- Data visualization guidelines
-- Voice & tone (microcopy)
+3. **Configure environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` and set your backend API URL:
+   ```
+   VITE_API_BASE_URL=http://localhost:8000
+   ```
 
-**When to use**: Reference for all design decisions, styling, and UX patterns
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
 
-### 2. **WIREFRAMES.md** (700+ lines)
-Detailed ASCII wireframes and layout specifications:
-- Page-by-page wireframes (Posts, Analytics, Leads)
-- Desktop, tablet, and mobile layouts
-- Component positioning and spacing
-- Interaction flow diagrams
-- Responsive breakpoint behavior
-- Visual state representations
-- Color-coded legends
+   The app will be available at `http://localhost:5173`
 
-**When to use**: Understanding page layouts and user flows
+## Backend Integration
 
-### 3. **COMPONENT_SHOWCASE.md** (800+ lines)
-Complete component library reference:
-- 11 custom components with full documentation
-- 30+ UI library components
-- Props, usage examples, and visual representations
-- Component states and variants
-- Responsive behavior per component
-- Accessibility features
-- Animation patterns
-- Best practices and common combinations
+This frontend connects to three FastAPI endpoints:
 
-**When to use**: Implementing or modifying components
+### 1. Post Agent API
+**Endpoint**: `POST /agents/post/chat`
 
-### 4. **PROJECT_SUMMARY.md** (500+ lines)
-High-level project overview:
-- Deliverables checklist
-- Features by agent (Posts, Analytics, Leads)
-- Technical architecture
-- File structure
-- Production readiness checklist
-- Future enhancement ideas
-- Learning resources
-
-**When to use**: Understanding the project scope and getting started
-
-### 5. **QUICK_REFERENCE.md** (200+ lines)
-Fast lookup guide:
-- Common class patterns
-- Import shortcuts
-- Color quick reference
-- Layout patterns
-- TypeScript interfaces
-- Mock data examples
-- Debugging tips
-
-**When to use**: Quick lookups during development
-
----
-
-## 🎨 Application Features
-
-### Three Main Agents
-
-#### 1️⃣ **Post Agent** (`/src/app/components/PostAgent.tsx`)
-**Purpose**: Create, schedule, and publish LinkedIn posts with AI assistance
-
-**Features**:
-- ✅ AI-powered chat interface for natural post creation
-- ✅ Real-time LinkedIn post preview (authentic styling)
-- ✅ Editable generated content
-- ✅ Status tracking (Draft → Scheduled → Posted)
-- ✅ Scheduling panel with date/time picker
-- ✅ Media upload support
-- ✅ AI suggestions inline
-
-**Layout**: Two-column (Chat Interface | Post Preview + Scheduling)
-
----
-
-#### 2️⃣ **Analyzer Agent** (`/src/app/components/AnalyzerAgent.tsx`)
-**Purpose**: Analyze LinkedIn performance with AI-powered insights
-
-**Features**:
-- ✅ Conversational Q&A for analytics queries
-- ✅ Live data sync indicator
-- ✅ 6 KPI cards (engagement, best post, optimal time, velocity, etc.)
-- ✅ Performance charts (Recharts integration)
-- ✅ Content type breakdown
-- ✅ AI-generated actionable recommendations
-- ✅ Trend indicators (up/down arrows)
-
-**Layout**: Two-column (Chat Q&A | Dashboard + KPIs + Charts)
-
----
-
-#### 3️⃣ **Leads Agent** (`/src/app/components/LeadsAgent.tsx`)
-**Purpose**: Find and export LinkedIn leads based on advanced filters
-
-**Features**:
-- ✅ Advanced search filters (job title, location, company, industry, keywords)
-- ✅ Real-time search progress with profile scan count
-- ✅ Results table with 8 leads
-- ✅ Connection degree badges (1st/2nd/3rd)
-- ✅ Export to CSV/JSON
-- ✅ Direct LinkedIn profile links
-- ✅ Empty state with clear instructions
-- ✅ Success notifications
-
-**Layout**: Single-column (Filters → Progress → Results Table)
-
----
-
-## 🧩 Core Components
-
-### Reusable Components
-
-| Component | Purpose | Location |
-|-----------|---------|----------|
-| `ChatInterface` | AI conversational UI | `/src/app/components/ChatInterface.tsx` |
-| `PostAgent` | Complete post creation page | `/src/app/components/PostAgent.tsx` |
-| `AnalyzerAgent` | Analytics dashboard | `/src/app/components/AnalyzerAgent.tsx` |
-| `LeadsAgent` | Lead generation page | `/src/app/components/LeadsAgent.tsx` |
-| `LinkedInPostPreview` | Authentic LinkedIn post mockup | `/src/app/components/LinkedInPostPreview.tsx` |
-| `SchedulingPanel` | Schedule/publish controls | `/src/app/components/SchedulingPanel.tsx` |
-| `KPICard` | Metric display cards | `/src/app/components/KPICard.tsx` |
-| `PostPerformanceChart` | Recharts integration | `/src/app/components/PostPerformanceChart.tsx` |
-| `ContentBreakdown` | Content type analysis | `/src/app/components/ContentBreakdown.tsx` |
-| `AIInsights` | AI recommendation cards | `/src/app/components/AIInsights.tsx` |
-| `MediaUpload` | File upload component | `/src/app/components/MediaUpload.tsx` |
-
----
-
-## 🎨 Design System Highlights
-
-### Color Palette
-- **Primary**: Blue 600 (#2563eb) - Actions, active states
-- **Backgrounds**: White (cards), Gray 50 (page), Gray 100 (AI messages)
-- **Text**: Gray 900 (primary), Gray 700 (secondary), Gray 600 (tertiary)
-- **Status**: Green (success), Red (error), Yellow (warning), Purple (special)
-
-### Typography
-- **Font**: System UI stack (native, professional)
-- **Scale**: 0.75rem to 1.5rem
-- **Weights**: Regular, Medium, Semibold
-- **Hierarchy**: Clear distinction between headings, body, and labels
-
-### Spacing
-- **Base Unit**: 4px
-- **Scale**: 4px, 8px, 12px, 16px, 24px, 32px
-- **Consistent**: All components use the same spacing system
-
-### Components
-- **Cards**: Rounded (12px), soft shadows, white background
-- **Buttons**: Blue primary, outlined secondary, ghost tertiary
-- **Inputs**: Border focus states, clear validation
-- **Badges**: Color-coded by status/type
-
----
-
-## 📱 Responsive Design
-
-### Breakpoints
-- **Mobile**: < 640px (stacked layouts)
-- **Tablet**: 640px - 1024px (side-by-side with reduced spacing)
-- **Desktop**: > 1024px (full two-column layouts, max 1400px width)
-
-### Key Adaptations
-- Two-column layouts stack on mobile
-- Navigation tabs show full labels on desktop, compact on mobile
-- KPI grids: 3 columns → 2 columns → 1 column
-- Tables: horizontal scroll on mobile
-- Reduced padding on smaller screens
-
----
-
-## 🏗️ Technical Architecture
-
-### Frontend Stack
+**Request**:
 ```json
 {
-  "framework": "React 18.3.1",
-  "language": "TypeScript",
-  "styling": "Tailwind CSS v4.1.12",
-  "ui-library": "Radix UI + Shadcn/ui",
-  "icons": "Lucide React v0.487.0",
-  "charts": "Recharts v2.15.2",
-  "animations": "Motion v12.23.24",
-  "build": "Vite 6.3.5"
+  "message": "Create a post about AI trends",
+  "session_id": "optional-session-id"
 }
 ```
 
-### File Structure
-```
-/src/app/
-  App.tsx                    # Main app with navigation
-  /components/
-    PostAgent.tsx            # Posts page
-    AnalyzerAgent.tsx        # Analytics page
-    LeadsAgent.tsx           # Leads page
-    ChatInterface.tsx        # Reusable chat
-    LinkedInPostPreview.tsx  # Post preview
-    SchedulingPanel.tsx      # Scheduling
-    KPICard.tsx              # Metrics
-    PostPerformanceChart.tsx # Charts
-    ContentBreakdown.tsx     # Content analysis
-    AIInsights.tsx           # AI recommendations
-    MediaUpload.tsx          # File upload
-    /ui/                     # 30+ UI components
-      button.tsx
-      input.tsx
-      card.tsx
-      badge.tsx
-      progress.tsx
-      select.tsx
-      table.tsx
-      ... (25+ more)
-/src/styles/
-  index.css                  # Main styles
-  tailwind.css               # Tailwind imports
-  theme.css                  # Theme configuration
+**Response**:
+```json
+{
+  "session_id": "session-123",
+  "response": "Generated post content...",
+  "conversation": [
+    {"role": "user", "content": "..."},
+    {"role": "assistant", "content": "..."}
+  ]
+}
 ```
 
----
+### 2. Analytics Agent API
+**Endpoint**: `POST /agents/analytics/chat`
 
-## ✅ Production Readiness Checklist
+**Request**:
+```json
+{
+  "message": "What's my best posting time?",
+  "session_id": "analytics-session-id"
+}
+```
 
-- ✅ **Fully Responsive**: Mobile, tablet, desktop tested
-- ✅ **Accessible**: WCAG AA compliant, keyboard navigation
-- ✅ **Performant**: Optimized rendering, smooth animations
-- ✅ **Type-Safe**: Full TypeScript coverage
-- ✅ **Component-Based**: Reusable, maintainable architecture
-- ✅ **Modern Stack**: Latest React patterns and tools
-- ✅ **Well-Documented**: 5 comprehensive documentation files
-- ✅ **Professional**: LinkedIn-native aesthetic
-- ✅ **Feature-Complete**: All requested features implemented
-- ✅ **No Dependencies Issues**: All packages installed and working
+**Response**:
+```json
+{
+  "session_id": "analytics-123",
+  "response": {
+    "status": "completed",
+    "decision": {
+      "insight": "Your best time is Tuesday at 9 AM..."
+    },
+    "reply": "Alternative response format"
+  },
+  "history": ["User: ...", "AI: ..."]
+}
+```
 
----
+### 3. Leads Agent API
+**Endpoint**: `POST /agents/lead/search`
 
-## 🎯 Key Highlights
+**Request**:
+```json
+{
+  "filters": {
+    "job_title": "Marketing Manager",
+    "location": "San Francisco, CA",
+    "industry": "Technology",
+    "keywords": ["AI", "SaaS"]
+  },
+  "limit": 10,
+  "session_id": "leads-session-id"
+}
+```
 
-### What Makes This Special
+**Response**:
+```json
+{
+  "session_id": "leads-123",
+  "status": "completed",
+  "data": [
+    {
+      "id": "1",
+      "name": "John Doe",
+      "role": "Marketing Manager",
+      "company": "TechCorp",
+      "location": "San Francisco, CA",
+      "profileUrl": "https://linkedin.com/in/johndoe",
+      "connectionDegree": "2nd"
+    }
+  ]
+}
+```
 
-1. **AI-First Design**: Natural language interactions via chat interfaces
-2. **LinkedIn Native**: Authentic post preview matching LinkedIn's exact styling
-3. **Comprehensive Docs**: 3,000+ lines of detailed documentation
-4. **Production Ready**: Zero placeholders, fully functional
-5. **Modern Stack**: Latest React 18, TypeScript, Tailwind v4
-6. **Accessible**: WCAG AA compliant throughout
-7. **Responsive**: Perfect on all devices
-8. **Performant**: Optimized animations and rendering
+## Error Handling
 
-### Design Excellence
-- Clean, professional aesthetic
-- Consistent visual language
-- Clear information hierarchy
-- Intuitive user flows
-- Delightful micro-interactions
-- Minimal cognitive load
+The application includes comprehensive error handling:
 
-### Developer Experience
-- Clear component structure
-- Reusable patterns
-- Full type safety
-- Easy to extend
-- Comprehensive documentation
-- Quick reference guides
+- **Connection Errors**: Shows warning banner if backend is unavailable
+- **Fallback Data**: Uses mock data when API is unreachable
+- **User Feedback**: Clear error messages guide users to resolution
+- **Graceful Degradation**: App remains functional even without backend
 
----
+## Environment Variables
 
-## 📖 How to Use This Documentation
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:8000` |
 
-### For Developers
-1. **Start Here**: Read this README for overview
-2. **Quick Lookup**: Use `QUICK_REFERENCE.md` during development
-3. **Component Details**: Reference `COMPONENT_SHOWCASE.md` when implementing
-4. **Design Decisions**: Consult `DESIGN_SYSTEM.md` for styling
-5. **Layout Questions**: Check `WIREFRAMES.md` for structure
+## Development
 
-### For Designers
-1. **Design System**: `DESIGN_SYSTEM.md` has all specs
-2. **Wireframes**: `WIREFRAMES.md` shows layouts
-3. **Components**: `COMPONENT_SHOWCASE.md` catalogs all UI elements
-4. **Colors & Typography**: Section 3 & 4 in `DESIGN_SYSTEM.md`
-
-### For Product Managers
-1. **Overview**: `PROJECT_SUMMARY.md` for high-level view
-2. **Features**: Section "Features by Agent" in this README
-3. **Deliverables**: Checklist in `PROJECT_SUMMARY.md`
-4. **Future Work**: Enhancement ideas in `PROJECT_SUMMARY.md`
-
----
-
-## 🚀 Getting Started Guide
-
-### First Time Setup
+### Run development server
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. Start development server
 npm run dev
-
-# 3. Open browser
-# Navigate to http://localhost:5173
 ```
 
-### Making Changes
-
-#### Modify Existing Component
-1. Find component in `/src/app/components/`
-2. Reference `COMPONENT_SHOWCASE.md` for props/usage
-3. Use `QUICK_REFERENCE.md` for common patterns
-4. Check `DESIGN_SYSTEM.md` for styling guidelines
-
-#### Add New Component
-1. Create file in `/src/app/components/`
-2. Follow patterns from `COMPONENT_SHOWCASE.md`
-3. Use consistent styling from `DESIGN_SYSTEM.md`
-4. Import and use in parent component
-
-#### Modify Styles
-1. Use Tailwind utility classes
-2. Reference `QUICK_REFERENCE.md` for common classes
-3. Check `DESIGN_SYSTEM.md` for color/spacing tokens
-4. Maintain responsive breakpoints (sm:, md:, lg:)
-
----
-
-## 🎨 Example Usage
-
-### Create a New KPI Card
-```tsx
-import { KPICard } from "./components/KPICard";
-import { Activity } from "lucide-react";
-
-<KPICard
-  title="New Metric"
-  value="42"
-  change={15}
-  trend="up"
-  icon={<Activity className="w-5 h-5 text-blue-600" />}
-  comparison="vs. last week"
-/>
+### Build for production
+```bash
+npm run build
 ```
 
-### Add a New Chat Message
-```tsx
-const newMessage: Message = {
-  id: Date.now().toString(),
-  role: "assistant",
-  content: "This is a new message!",
-  timestamp: new Date(),
-};
-setMessages(prev => [...prev, newMessage]);
+### Preview production build
+```bash
+npm run preview
 ```
 
-### Create a Custom Badge
-```tsx
-import { Badge } from "./components/ui/badge";
-
-<Badge className="bg-purple-100 text-purple-700">
-  Custom Status
-</Badge>
+### Type checking
+```bash
+npm run type-check
 ```
 
----
+## Project Structure
 
-## 🔧 Customization
-
-### Change Colors
-Edit color values in `DESIGN_SYSTEM.md` and update Tailwind classes throughout.
-
-### Add New Agent/Page
-1. Create component in `/src/app/components/YourAgent.tsx`
-2. Add to navigation in `/src/app/App.tsx`
-3. Follow layout patterns from existing agents
-
-### Modify Chat Responses
-Update AI response logic in agent components (PostAgent, AnalyzerAgent):
-```tsx
-const handleSendMessage = (message: string) => {
-  // Custom AI response logic here
-};
+```
+src/
+├── app/
+│   ├── components/        # React components
+│   │   ├── PostAgent.tsx      # Post creation interface
+│   │   ├── AnalyzerAgent.tsx  # Analytics dashboard
+│   │   ├── LeadsAgent.tsx     # Lead generation
+│   │   ├── ChatInterface.tsx  # Reusable chat component
+│   │   └── ui/               # UI primitives
+│   └── App.tsx            # Main app component
+├── lib/
+│   └── api.ts            # API integration utilities
+└── styles/
+    └── theme.css         # Design tokens and styles
 ```
 
-### Connect Real APIs
-Replace mock data with API calls in relevant components:
-- PostAgent: Replace `mockPost` generation
-- AnalyzerAgent: Replace `kpiData` with API response
-- LeadsAgent: Replace `mockLeads` with API response
+## API Configuration
 
----
+The application uses environment variables for API configuration. Make sure your FastAPI backend is:
 
-## 📊 Performance Optimization
+1. Running on the correct port (default: 8000)
+2. Accepting CORS requests from your frontend origin
+3. Implementing the three agent endpoints as documented
 
-Built-in optimizations:
-- Component memoization where needed
-- CSS transforms for smooth animations
-- Optimized re-renders with proper state management
-- Lazy loading ready for future enhancements
-- Responsive images with proper sizing
+### CORS Setup (Backend)
 
----
+Ensure your FastAPI backend has CORS configured:
 
-## ♿ Accessibility
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-WCAG AA Compliant:
-- ✅ Keyboard navigation support
-- ✅ Screen reader friendly
-- ✅ ARIA labels on all interactive elements
-- ✅ Sufficient color contrast (4.5:1 minimum)
-- ✅ Focus visible on all focusable elements
-- ✅ Semantic HTML structure
+app = FastAPI()
 
----
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
-### Common Issues
+### "Connection Error" banners appearing
 
-**Icons not displaying?**
-- Verify icon name exists in lucide-react
-- Check import statement
-- Use bash tool to verify exports
+1. Verify backend is running: `curl http://localhost:8000/health`
+2. Check CORS configuration in backend
+3. Verify `VITE_API_BASE_URL` in `.env` matches your backend URL
+4. Check browser console for detailed error messages
 
-**Styling not applying?**
-- Check Tailwind class names
-- Verify responsive prefixes (sm:, md:, lg:)
-- Review `QUICK_REFERENCE.md` for patterns
+### Mock data showing instead of real data
 
-**Component not rendering?**
-- Check TypeScript errors
-- Verify props match interface
-- Review `COMPONENT_SHOWCASE.md` for correct usage
+- This is expected behavior when backend is unavailable
+- The app gracefully degrades to show mock data
+- Check the error banner for connection status
 
----
+### Environment variables not loading
 
-## 📝 License & Credits
+- Restart the Vite dev server after changing `.env`
+- Ensure variables start with `VITE_` prefix
+- Use `import.meta.env.VITE_VARIABLE_NAME` to access them
 
-**Framework**: React (MIT)  
-**UI Components**: Radix UI (MIT), Shadcn/ui (MIT)  
-**Icons**: Lucide React (ISC)  
-**Charts**: Recharts (MIT)  
-**Styling**: Tailwind CSS (MIT)
+## Features in Detail
 
----
+### Session Management
+Each agent maintains its own session ID to track conversation history and context across API calls.
 
-## 🎉 Conclusion
+### Real-time Updates
+The chat interfaces provide real-time typing indicators and smooth message animations.
 
-This is a **complete, production-ready application** with:
+### Responsive Design
+Fully responsive across desktop, tablet, and mobile devices with breakpoints at:
+- Mobile: < 640px
+- Tablet: 640px - 1024px
+- Desktop: > 1024px
 
-✅ 3 fully functional agents  
-✅ 11 custom components  
-✅ 30+ UI components  
-✅ 5 comprehensive documentation files (3,000+ lines)  
-✅ Responsive across all devices  
-✅ Accessible and performant  
-✅ Modern tech stack  
-✅ Clean, professional design  
+## Contributing
 
-**Ready to deploy or extend!**
+When contributing to the frontend:
 
----
+1. Follow the existing component structure
+2. Use TypeScript for all new code
+3. Maintain consistent styling with Tailwind CSS
+4. Test with both real API and fallback modes
+5. Ensure responsive design works on all breakpoints
 
-## 📞 Documentation Quick Links
+## License
 
-- 📘 [Design System](./DESIGN_SYSTEM.md) - Complete design specifications
-- 📐 [Wireframes](./WIREFRAMES.md) - Layout and flow diagrams
-- 🧩 [Component Showcase](./COMPONENT_SHOWCASE.md) - Component library reference
-- 📋 [Project Summary](./PROJECT_SUMMARY.md) - High-level overview
-- ⚡ [Quick Reference](./QUICK_REFERENCE.md) - Fast lookup guide
-
----
-
-**Version**: 1.0  
-**Status**: ✅ Production Ready  
-**Last Updated**: December 2024  
-**Total Documentation**: 3,000+ lines across 5 files  
-**Components**: 11 custom + 30+ UI components  
-**Tech Stack**: React + TypeScript + Tailwind CSS v4
+[Your License Here]

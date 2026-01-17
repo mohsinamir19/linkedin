@@ -3,9 +3,20 @@ from fastapi import FastAPI
 from post.api import router as post_router
 from analytics.api import router as analytics_router
 from lead.api import router as lead_router
+from post.scheduler.api import router as scheduler_router
 
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="LinkedIn AI Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # frontend
+    allow_credentials=True,
+    allow_methods=["*"],   # 👈 allows OPTIONS, GET, POST
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 async def root():
@@ -21,6 +32,10 @@ app.include_router(post_router)
 app.include_router(analytics_router)
 
 app.include_router(lead_router)
+
+app.include_router(scheduler_router)
+
+
 
 def run():
     uvicorn.run(

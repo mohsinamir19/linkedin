@@ -4,7 +4,8 @@ import { KPICard } from "./KPICard";
 import { PostPerformanceChart } from "./PostPerformanceChart";
 import { ContentBreakdown } from "./ContentBreakdown";
 import { AIInsights } from "./AIInsights";
-import { Activity, TrendingUp, TrendingDown, Target, PenTool, Zap, RefreshCw } from "lucide-react";
+import { Activity, TrendingUp, TrendingDown, Target, PenTool, Zap, RefreshCw, AlertCircle } from "lucide-react";
+import { sendAnalyticsMessage } from "@/lib/api";
 
 export function AnalyzerAgent() {
   const [messages, setMessages] = useState<Message[]>([
@@ -16,8 +17,10 @@ export function AnalyzerAgent() {
     },
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState<string>(`analytics-${Date.now()}`);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = async (message: string) => {
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -26,86 +29,69 @@ export function AnalyzerAgent() {
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, userMessage]);
+    setApiError(null);
 
-    // Simulate AI response
+    // Call the real API
     setIsTyping(true);
-    setTimeout(() => {
-      let response = "";
+    try {
+      const response = await sendAnalyticsMessage(message, sessionId);
+      
+      // Update session ID if changed
+      if (response.session_id) {
+        setSessionId(response.session_id);
+      }
 
-      if (message.toLowerCase().includes("best time") || message.toLowerCase().includes("when")) {
-        response = `Based on your last 30 days of data, here are your optimal posting times:
-
-🏆 Best Time: Tuesday at 9:00 AM
-- Average engagement: 287 interactions
-- 45% higher than your overall average
-
-📊 Other strong time slots:
-• Wednesday 2:00 PM - 223 avg interactions
-• Thursday 10:00 AM - 198 avg interactions
-• Friday 8:30 AM - 176 avg interactions
-
-💡 Insight: Your audience is most active on weekday mornings, especially mid-week. Try posting educational or thought-leadership content during these windows.`;
-      } else if (message.toLowerCase().includes("engagement") || message.toLowerCase().includes("performance")) {
-        response = `Here's your engagement overview:
-
-📈 Current Metrics:
-• Average engagement rate: 4.8% (↑12% vs last month)
-• Total impressions: 12,450
-• Profile visits: 234 (↑18%)
-
-🎯 Top Performing Content:
-Your posts with storytelling and personal experiences get 65% more engagement than pure industry updates.
-
-💡 Recommendations:
-1. Continue mixing professional insights with personal stories
-2. Use 3-5 hashtags per post (sweet spot for your audience)
-3. Posts with images get 2.3x more engagement than text-only
-
-Want me to dive deeper into any specific metric?`;
-      } else if (message.toLowerCase().includes("improve") || message.toLowerCase().includes("better")) {
-        response = `Here are AI-powered recommendations to boost your LinkedIn performance:
-
-🚀 Content Strategy:
-1. **Hook Optimization**: 78% of your top posts start with a question or bold statement. Use this pattern more consistently.
-
-2. **Optimal Length**: Your best-performing posts are 150-200 words. Shorter posts (< 100 words) underperform by 34%.
-
-3. **Visual Content**: Posts with images get 2.3x engagement. Consider adding visuals to every post.
-
-4. **Hashtag Strategy**: Use 3-5 hashtags. You're currently using 2-3, missing potential reach.
-
-5. **CTA Effectiveness**: Posts ending with "What's your experience?" get 56% more comments than generic CTAs.
-
-📊 Posting Schedule:
-- Increase Tuesday/Wednesday posts (your peak days)
-- Reduce weekend posting (40% lower engagement)
-
-Would you like specific examples for any of these strategies?`;
+      // Extract the response content
+      let responseContent = "";
+      if (response.response.status === "completed" && response.response.decision?.insight) {
+        responseContent = response.response.decision.insight;
+      } else if (response.response.reply) {
+        responseContent = response.response.reply;
+      } else if (typeof response.response === 'string') {
+        responseContent = response.response;
       } else {
-        response = `I can help you with:
-
-📊 **Performance Analysis**: Understanding your engagement, reach, and growth metrics
-⏰ **Timing Optimization**: Finding your best posting times
-🎯 **Content Strategy**: Identifying what content resonates with your audience
-📈 **Trend Analysis**: Spotting patterns in your top and bottom performing posts
-💡 **Actionable Insights**: Specific recommendations to improve your LinkedIn presence
-
-What aspect would you like to explore first?`;
+        responseContent = JSON.stringify(response.response, null, 2);
       }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: response,
+        content: responseContent,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("API Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to connect to the server";
+      setApiError(errorMessage);
+      
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `⚠️ I'm having trouble connecting to the analytics server. Please check that your backend is running.\n\nError: ${errorMessage}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-    }, 1800);
+    }
   };
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* API Error Banner */}
+      {apiError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-900">Connection Error</p>
+            <p className="text-sm text-red-700 mt-1">
+              Unable to connect to the backend API. Make sure your FastAPI server is running on the correct port.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Panel - Chat Interface */}
         <div className="space-y-4">

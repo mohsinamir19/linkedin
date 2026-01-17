@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Download, ExternalLink, MapPin, Briefcase, Building2, Loader2, CircleCheck, Users } from "lucide-react";
+import { Search, Download, ExternalLink, MapPin, Briefcase, Building2, Loader2, CircleCheck, Users, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { searchLeads, Lead as APILead } from "@/lib/api";
 
 interface Lead {
   id: string;
@@ -36,6 +37,8 @@ export function LeadsAgent() {
     keywords: "",
   });
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [sessionId, setSessionId] = useState<string>(`leads-${Date.now()}`);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const mockLeads: Lead[] = [
     {
@@ -112,28 +115,67 @@ export function LeadsAgent() {
     },
   ];
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setIsSearching(true);
     setSearchComplete(false);
     setProgress(0);
     setProfilesScanned(0);
     setLeads([]);
+    setApiError(null);
 
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev + 10;
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setIsSearching(false);
-          setSearchComplete(true);
-          setLeads(mockLeads);
-          return 100;
-        }
-        return newProgress;
-      });
+    // Simulate progress animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => Math.min(prev + 10, 90));
       setProfilesScanned((prev) => prev + Math.floor(Math.random() * 30) + 10);
     }, 300);
+
+    try {
+      // Prepare API filters
+      const apiFilters: any = {};
+      if (filters.jobTitle) apiFilters.job_title = filters.jobTitle;
+      if (filters.location) apiFilters.location = filters.location;
+      if (filters.industry) apiFilters.industry = filters.industry;
+      if (filters.keywords) apiFilters.keywords = filters.keywords.split(',').map(k => k.trim());
+
+      // Call the real API
+      const response = await searchLeads(apiFilters, 10, sessionId);
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      if (response.status === "completed" && Array.isArray(response.data)) {
+        // Map API leads to local Lead interface
+        const mappedLeads: Lead[] = response.data.map((apiLead: APILead) => ({
+          id: apiLead.id || Math.random().toString(),
+          name: apiLead.name || "Unknown",
+          role: apiLead.role || "N/A",
+          company: apiLead.company || "N/A",
+          location: apiLead.location || "N/A",
+          profileUrl: apiLead.profileUrl || "#",
+          connectionDegree: apiLead.connectionDegree || "N/A",
+        }));
+        setLeads(mappedLeads);
+        setSearchComplete(true);
+      } else {
+        // Handle non-array response (fallback or error message)
+        console.warn("API returned non-array data:", response.data);
+        setApiError("The search returned an unexpected format. Using mock data.");
+        setLeads(mockLeads);
+        setSearchComplete(true);
+      }
+    } catch (error) {
+      clearInterval(progressInterval);
+      console.error("API Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to connect to the server";
+      setApiError(errorMessage);
+      
+      // Use mock data as fallback
+      setLeads(mockLeads);
+      setProgress(100);
+      setSearchComplete(true);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleExport = (format: "csv" | "json") => {
@@ -149,6 +191,19 @@ export function LeadsAgent() {
         <h1 className="text-2xl font-semibold text-gray-900 mb-2">Leads Agent</h1>
         <p className="text-gray-600">Find and connect with potential leads on LinkedIn</p>
       </div>
+
+      {/* API Error Banner */}
+      {apiError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-900">Connection Warning</p>
+            <p className="text-sm text-red-700 mt-1">
+              {apiError} Make sure your FastAPI server is running on the correct port.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filter Panel */}
       <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">

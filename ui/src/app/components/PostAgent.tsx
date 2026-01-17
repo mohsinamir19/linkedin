@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ChatInterface, Message } from "./ChatInterface";
 import { LinkedInPostPreview } from "./LinkedInPostPreview";
 import { SchedulingPanel } from "./SchedulingPanel";
+import { ScheduledJobsPanel } from "./ScheduledJobsPanel";
 import { Badge } from "./ui/badge";
-import { Calendar, CircleCheck, FileText } from "lucide-react";
+import { Calendar, CircleCheck, FileText, AlertCircle } from "lucide-react";
+import { sendPostMessage } from "@/lib/api";
 
 export function PostAgent() {
   const [messages, setMessages] = useState<Message[]>([
@@ -18,8 +20,11 @@ export function PostAgent() {
   const [generatedPost, setGeneratedPost] = useState("");
   const [postStatus, setPostStatus] = useState<"draft" | "scheduled" | "posted">("draft");
   const [uploadedMedia, setUploadedMedia] = useState<Array<{ type: string; url: string; name: string }>>([]);
+  const [sessionId, setSessionId] = useState<string>(`session-${Date.now()}`);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const handleSendMessage = (message: string) => {
+  // Send message to backend
+  const handleSendMessage = async (message: string) => {
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -27,56 +32,64 @@ export function PostAgent() {
       content: message,
       timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages(prev => [...prev, userMessage]);
+    setApiError(null);
 
-    // Simulate AI response
     setIsTyping(true);
-    setTimeout(() => {
-      // Generate a post based on the message
-      const mockPost = `🚀 Excited to share insights on ${message.toLowerCase().includes("ai") ? "AI" : "innovation"}!
+    try {
+      const response = await sendPostMessage(message, sessionId);
 
-After working in this space, here are 3 key takeaways:
+      if (response.session_id) setSessionId(response.session_id);
 
-1️⃣ ${message.includes("?") ? "Great question! Here's what I've learned" : "Start with authenticity"} - Be genuine in your approach
-2️⃣ Data-driven decisions matter - Let metrics guide your strategy
-3️⃣ Community engagement is everything - Your network is your net worth
+      const responseText = response.response;
 
-The future is about collaboration, not competition.
-
-What are your thoughts? Let's discuss in the comments! 👇
-
-#LinkedIn #ProfessionalGrowth #Innovation`;
-
-      setGeneratedPost(mockPost);
+      // Auto-detect if it's a LinkedIn-style post
+      if (responseText && (responseText.includes("#") || responseText.includes("🚀") || responseText.includes("💡") || responseText.length > 200)) {
+        setGeneratedPost(responseText);
+        setPostStatus("draft");
+      }
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `I've created a LinkedIn post based on your request! You can see it in the preview on the right.
-
-Here's what I've included:
-• A compelling hook with an emoji
-• 3 key points formatted with numbered emojis
-• A clear call-to-action
-• Relevant hashtags
-
-Would you like me to:
-- Modify the tone or content?
-- Schedule this post for a specific time?
-- Add media attachments?
-- Post it immediately?`,
+        content: responseText,
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("API Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to connect to the server";
+      setApiError(errorMessage);
+
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `⚠️ Unable to connect to the backend. Please check that your FastAPI server is running.\n\nError: ${errorMessage}`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorResponse]);
+    } finally {
       setIsTyping(false);
-      setPostStatus("draft");
-    }, 1500);
+    }
   };
 
   return (
     <div className="max-w-[1400px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* API Error Banner */}
+      {apiError && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-red-900">Connection Error</p>
+            <p className="text-sm text-red-700 mt-1">
+              Unable to connect to the backend API. Make sure your FastAPI server is running on the correct port.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Panel - Chat Interface */}
+        {/* Left Panel - Chat */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -97,7 +110,7 @@ Would you like me to:
           </div>
         </div>
 
-        {/* Right Panel - Post Preview & Status */}
+        {/* Right Panel - Post Preview & Scheduling */}
         <div className="space-y-6">
           {/* Status Card */}
           {generatedPost && (
@@ -120,8 +133,8 @@ Would you like me to:
                        "Draft"}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {postStatus === "posted" ? "Posted 2 minutes ago" :
-                       postStatus === "scheduled" ? "Scheduled for Tuesday, 9:00 AM" :
+                      {postStatus === "posted" ? "Posted recently" :
+                       postStatus === "scheduled" ? "Scheduled for your chosen time" :
                        "Ready to schedule or post"}
                     </p>
                   </div>
@@ -140,7 +153,7 @@ Would you like me to:
             </div>
           )}
 
-          {/* LinkedIn Preview */}
+          {/* LinkedIn Post Preview */}
           <LinkedInPostPreview
             postText={generatedPost}
             uploadedMedia={uploadedMedia}
@@ -148,9 +161,10 @@ Would you like me to:
           />
 
           {/* Scheduling Panel */}
-          {generatedPost && (
-            <SchedulingPanel />
-          )}
+          {generatedPost && <SchedulingPanel />}
+
+          {/* Scheduled Jobs Panel */}
+          <ScheduledJobsPanel />
         </div>
       </div>
     </div>
