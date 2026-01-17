@@ -6,7 +6,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents import Runner
-from lead.agents_1.main_agent import main_leads_agent
+from lead.agents_1.main_agent import structured_leads_agent 
 
 async def process_lead_request(query_data: dict):
     """
@@ -18,7 +18,7 @@ async def process_lead_request(query_data: dict):
     input_str = json.dumps(query_data)
 
     # 2. Run the Orchestrator Agent
-    result = await Runner.run(main_leads_agent, input_str)
+    result = await Runner.run(structured_leads_agent , input_str)
     output = result.final_output.strip()
 
     try:

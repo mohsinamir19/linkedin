@@ -4,6 +4,15 @@ from post.api import router as post_router
 from analytics.api import router as analytics_router
 from lead.api import router as lead_router
 from post.scheduler.api import router as scheduler_router
+import sys
+import asyncio
+import sys
+import asyncio
+
+if sys.platform.startswith("win"):
+    # Fix for Playwright subprocess NotImplementedError on Windows
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
 
 from fastapi.middleware.cors import CORSMiddleware
 

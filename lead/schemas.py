@@ -51,3 +51,27 @@ class ScoredLead:
     linkedin_url: str
     relevance_score: int
     explanation: str
+
+# lead/schemas.py
+from dataclasses import dataclass
+from typing import List, Optional
+
+# ===============================
+# Structured Lead Output
+# ===============================
+
+@dataclass
+class Lead:
+    name: str
+    linkedin_url: str          # validated URL
+    role: str
+    company: str
+    location: str
+    relevance_score: int            # non-default fields first
+    explanation: str
+    connectionDegree: Optional[str] = "N/A"  # default field last
+
+
+@dataclass
+class LeadsList:
+    leads: List[Lead]
