@@ -13,7 +13,7 @@ async def fetch_linkedin_analytics(query: str) -> str:
     Retrieves stored LinkedIn post performance data including likes, comments, and post times.
     Use this tool whenever the user asks about their own post performance or 'best time to post'.
     """
-    file_path = "analytics.json"
+    file_path = r"C:\Users\sbato\OneDrive\Desktop\linkedin\analytics\analytics.json"
     if not os.path.exists(file_path):
         return "Error: No analytics data found. Please run the scraper first."
     

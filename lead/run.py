@@ -9,28 +9,32 @@ from agents import Runner
 from lead.agents_1.main_agent import structured_leads_agent 
 
 async def process_lead_request(query_data: dict):
-    # This calls the Agent
-    # If using pydantic-ai or similar:
-    result = await structured_leads_agent.run(str(query_data))
-    
-    # ❌ OLD BUGGY WAY: 
-    # return {"status": "completed", "reply": result.data.strip()} <-- CRASH!
+    print("\n🔍 Processing Lead Request...")
 
-    # ✅ NEW FIXED WAY:
-    # Check if the data is already the LeadsList object
-    if hasattr(result.data, 'leads'):
-        # Convert Pydantic/Dataclass to a list of dicts for the API
-        leads_as_dicts = [lead.model_dump() if hasattr(lead, 'model_dump') else lead.__dict__ 
-                         for lead in result.data.leads]
+    # ✅ CORRECT: use Runner.run (Agent has no .run)
+    result = await Runner.run(
+        structured_leads_agent,
+        str(query_data)
+    )
+
+    # If structured output is a leads list
+    if hasattr(result.final_output, "leads"):
+        leads = result.final_output.leads
+
+        leads_as_dicts = [
+            lead.model_dump() if hasattr(lead, "model_dump") else lead.__dict__
+            for lead in leads
+        ]
+
         return {
             "status": "completed",
             "leads": leads_as_dicts
         }
-    
-    # Fallback if it returned a string instead of the object
+
+    # Fallback (agent returned natural text)
     return {
         "status": "completed",
-        "reply": str(result.data).strip()
+        "reply": str(result.final_output).strip()
     }
 
 # For manual CLI testing

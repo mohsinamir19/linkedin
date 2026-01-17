@@ -11,13 +11,6 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
     Search LinkedIn people results and return raw profiles with detailed logging.
     """
     print("🚀 [START] Starting LinkedIn Search Tool...")
-    
-    EMAIL = os.getenv("LINKEDIN_EMAIL")
-    PASSWORD = os.getenv("LINKEDIN_PASSWORD")
-
-    if not EMAIL or not PASSWORD:
-        print("❌ [ERROR] Missing LinkedIn credentials in environment variables.")
-        return []
 
     filters = request.filters
     limit = request.limit
@@ -31,47 +24,51 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
 
     async with async_playwright() as p:
         print("🌐 [BROWSER] Launching Chromium...")
-        # Added extra args to look more "human"
         browser = await p.chromium.launch(
             headless=False,
-            args=["--disable-blink-features=AutomationControlled"] 
+            args=["--disable-blink-features=AutomationControlled"]
         )
-        
-        # Adding a User Agent is critical for LinkedIn
+
         context = await browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
         )
         page = await context.new_page()
 
         try:
-            # --- LOGIN PHASE ---
-            print("🔐 [LOGIN] Navigating to login page...")
-            await page.goto("https://www.linkedin.com/login", wait_until="domcontentloaded")
-            
-            print(f"📧 [LOGIN] Filling email: {EMAIL}")
-            await page.fill("#username", EMAIL)
-            await page.fill("#password", PASSWORD)
-            
-            print("🖱️ [LOGIN] Clicking Submit...")
-            await page.click("button[type='submit']")
+            # --- LOGIN USING COOKIES ---
+            print("🍪 [COOKIES] Loading cookies from file...")
 
-            # Check if we hit a verification/security wall
-            print("⏳ [LOGIN] Waiting for feed or security check...")
+            COOKIES_PATH = r"C:\Users\sbato\OneDrive\Desktop\linkedin\cookies.json"
+
             try:
-                # We wait for the 'Feed' icon or the search bar to appear
-                await page.wait_for_selector(".global-nav__primary-link", timeout=15000)
-                print("✅ [LOGIN] Login successful!")
-            except:
-                print("⚠️ [WARNING] Login timeout. You might be seeing a CAPTCHA or 'Security Check'. Check the browser window!")
-                # Give user time to solve CAPTCHA manually if needed
-                await asyncio.sleep(10) 
+                import json
+                with open(COOKIES_PATH, "r", encoding="utf-8") as f:
+                    cookies = json.load(f)
+
+                await context.add_cookies(cookies)
+                print("✅ [COOKIES] Cookies successfully added to browser session.")
+
+                # Navigate to LinkedIn feed to verify login
+                print("🌐 [COOKIES] Navigating to LinkedIn feed...")
+                await page.goto("https://www.linkedin.com/feed/", wait_until="domcontentloaded")
+
+                # Check if logged in
+                try:
+                    await page.wait_for_selector(".global-nav__primary-link", timeout=8000)
+                    print("🔓 [COOKIES] Logged in using cookies!")
+                except:
+                    print("⚠️ [COOKIES] Cookies expired or invalid. Please refresh cookies.")
+                    return []
+
+            except Exception as e:
+                print(f"❌ [COOKIES ERROR] Failed to load cookies: {e}")
+                return []
 
             # --- SEARCH PHASE ---
             print(f"🔍 [SEARCH] Navigating to: {search_url}")
             await page.goto(search_url, wait_until="domcontentloaded")
-            
+
             print("⏳ [SEARCH] Waiting for results to load...")
-            # Instead of a fixed timeout, we wait for the result container
             try:
                 await page.wait_for_selector('div[data-view-name="people-search-result"]', timeout=10000)
                 print("✅ [SEARCH] Results detected on page.")
@@ -91,7 +88,6 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
                         continue
 
                     full_text = (await name_el.inner_text()).strip()
-                    # Name is usually the first line
                     name = full_text.split('\n')[0]
                     url = await name_el.get_attribute("href")
 
@@ -117,12 +113,13 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
                         )
                     )
                 except Exception as e:
-                    print(f"⚠️ [SCRAPE] Skipping an item due to error: {e}")
+                    print(f"⚠️ [SCRAPE] Skipping item due to error: {e}")
                     continue
 
         except Exception as e:
             print(f"❌ [FATAL ERROR] Tool crashed: {e}")
             await page.screenshot(path="fatal_error.png")
+
         finally:
             print("🏁 [END] Closing browser...")
             await browser.close()
