@@ -12,7 +12,8 @@ export function PostAgent() {
     {
       id: "1",
       role: "assistant",
-      content: "Hi! I'm your LinkedIn Post Agent. I can help you create engaging posts, schedule them, and publish to LinkedIn. Just describe what you'd like to post about!",
+      content:
+        "Hi! I'm your LinkedIn Post Agent. I can help you create engaging posts, schedule them, and publish to LinkedIn. Just describe what you'd like to post about!",
       timestamp: new Date(),
     },
   ]);
@@ -32,7 +33,7 @@ export function PostAgent() {
       content: message,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setApiError(null);
 
     setIsTyping(true);
@@ -41,10 +42,22 @@ export function PostAgent() {
 
       if (response.session_id) setSessionId(response.session_id);
 
-      const responseText = response.response;
+      // Handle both string or object response
+      let responseText = "";
+      if (typeof response.response === "string") {
+        responseText = response.response;
+      } else if (response.response?.reply) {
+        responseText = response.response.reply;
+      }
 
       // Auto-detect if it's a LinkedIn-style post
-      if (responseText && (responseText.includes("#") || responseText.includes("🚀") || responseText.includes("💡") || responseText.length > 200)) {
+      if (
+        responseText &&
+        (responseText.includes("#") ||
+          responseText.includes("🚀") ||
+          responseText.includes("💡") ||
+          responseText.length > 200)
+      ) {
         setGeneratedPost(responseText);
         setPostStatus("draft");
       }
@@ -55,7 +68,7 @@ export function PostAgent() {
         content: responseText,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("API Error:", error);
       const errorMessage = error instanceof Error ? error.message : "Failed to connect to the server";
@@ -67,7 +80,7 @@ export function PostAgent() {
         content: `⚠️ Unable to connect to the backend. Please check that your FastAPI server is running.\n\nError: ${errorMessage}`,
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorResponse]);
+      setMessages((prev) => [...prev, errorResponse]);
     } finally {
       setIsTyping(false);
     }
@@ -117,34 +130,48 @@ export function PostAgent() {
             <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    postStatus === "posted" ? "bg-green-50" :
-                    postStatus === "scheduled" ? "bg-blue-50" :
-                    "bg-gray-50"
-                  }`}>
-                    {postStatus === "posted" ? <CircleCheck className="w-5 h-5 text-green-600" /> :
-                     postStatus === "scheduled" ? <Calendar className="w-5 h-5 text-blue-600" /> :
-                     <FileText className="w-5 h-5 text-gray-600" />}
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      postStatus === "posted"
+                        ? "bg-green-50"
+                        : postStatus === "scheduled"
+                        ? "bg-blue-50"
+                        : "bg-gray-50"
+                    }`}
+                  >
+                    {postStatus === "posted" ? (
+                      <CircleCheck className="w-5 h-5 text-green-600" />
+                    ) : postStatus === "scheduled" ? (
+                      <Calendar className="w-5 h-5 text-blue-600" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-gray-600" />
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {postStatus === "posted" ? "Published" :
-                       postStatus === "scheduled" ? "Scheduled" :
-                       "Draft"}
+                      {postStatus === "posted"
+                        ? "Published"
+                        : postStatus === "scheduled"
+                        ? "Scheduled"
+                        : "Draft"}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {postStatus === "posted" ? "Posted recently" :
-                       postStatus === "scheduled" ? "Scheduled for your chosen time" :
-                       "Ready to schedule or post"}
+                      {postStatus === "posted"
+                        ? "Posted recently"
+                        : postStatus === "scheduled"
+                        ? "Scheduled for your chosen time"
+                        : "Ready to schedule or post"}
                     </p>
                   </div>
                 </div>
                 <Badge
                   variant={postStatus === "posted" ? "default" : "secondary"}
                   className={
-                    postStatus === "posted" ? "bg-green-100 text-green-700 hover:bg-green-100" :
-                    postStatus === "scheduled" ? "bg-blue-100 text-blue-700" :
-                    "bg-gray-100 text-gray-700"
+                    postStatus === "posted"
+                      ? "bg-green-100 text-green-700 hover:bg-green-100"
+                      : postStatus === "scheduled"
+                      ? "bg-blue-100 text-blue-700"
+                      : "bg-gray-100 text-gray-700"
                   }
                 >
                   {postStatus}
@@ -154,11 +181,7 @@ export function PostAgent() {
           )}
 
           {/* LinkedIn Post Preview */}
-          <LinkedInPostPreview
-            postText={generatedPost}
-            uploadedMedia={uploadedMedia}
-            onEdit={setGeneratedPost}
-          />
+          <LinkedInPostPreview postText={generatedPost} uploadedMedia={uploadedMedia} onEdit={setGeneratedPost} />
 
           {/* Scheduling Panel */}
           {generatedPost && <SchedulingPanel />}
