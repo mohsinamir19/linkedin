@@ -25,7 +25,7 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
     async with async_playwright() as p:
         print("🌐 [BROWSER] Launching Chromium...")
         browser = await p.chromium.launch(
-            headless=False,
+            headless=True,
             args=["--disable-blink-features=AutomationControlled"]
         )
 
@@ -38,7 +38,7 @@ async def linkedin_search_tool(request: SearchRequest) -> list[dict]:
             # --- LOGIN USING COOKIES ---
             print("🍪 [COOKIES] Loading cookies from file...")
 
-            COOKIES_PATH = r"C:\Users\sbato\OneDrive\Desktop\linkedin\cookies.json"
+            COOKIES_PATH = r"D:\linkedin\cookies.json"
 
             try:
                 import json

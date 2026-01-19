@@ -1,7 +1,7 @@
 # post/api.py
 from fastapi import APIRouter, BackgroundTasks
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 from agents import SQLiteSession
 from post.run import process_post_request
 
@@ -21,17 +21,20 @@ def get_session(session_id: str) -> SQLiteSession:
 @router.post("/chat")
 async def chat_with_post_agent(
     payload: PostChatRequest,
-    background_tasks: BackgroundTasks   # ✅ added
+    background_tasks: BackgroundTasks
 ):
     session = get_session(payload.session_id)
 
+    # process_post_request returns the "Job Dictionary" or a string
     ai_response = await process_post_request(
         payload.message,
         session,
-        background_tasks   # ✅ pass it down
+        background_tasks
     )
 
+    # ✅ Wrap the response clearly
     return {
         "session_id": payload.session_id,
-        "response": ai_response
+        "status": "success",
+        "response": ai_response 
     }

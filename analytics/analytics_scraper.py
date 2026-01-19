@@ -211,7 +211,7 @@ class LinkedInAnalyticsScraper:
         log("Starting LinkedIn Analytics Scraper")
 
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=False)
+            browser = await p.chromium.launch(headless=True)
             context = await browser.new_context(viewport={"width": 1280, "height": 800})
 
             if not await self.load_cookies(context):
