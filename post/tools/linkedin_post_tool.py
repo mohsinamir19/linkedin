@@ -3,7 +3,7 @@ import os
 from playwright.async_api import async_playwright
 
 # Define your cookie path
-COOKIES_PATH = r"D:\linkedin\cookies.json"
+COOKIES_PATH = r"C:\Users\sbato\OneDrive\Desktop\linkedin\cookies.json"
 
 async def safe_click(page, selector, description="", timeout=5000):
     try:

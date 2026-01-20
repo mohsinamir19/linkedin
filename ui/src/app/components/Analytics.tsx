@@ -48,7 +48,7 @@ export function Analytics() {
         />
         <KPICard
           title="Best Performing Post"
-          value="287"
+          value="45"
           label="engagements"
           change={45}
           trend="up"
