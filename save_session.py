@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from playwright.async_api import async_playwright
 
-COOKIES_PATH = Path(r"C:\Users\sbato\OneDrive\Desktop\linkedin\cookies.json")
+COOKIES_PATH = Path(r"\cookies.json")
 
 async def save_cookies_example():
     async with async_playwright() as pw:
