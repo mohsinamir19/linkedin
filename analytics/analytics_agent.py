@@ -40,13 +40,7 @@ WORKFLOW:
 2. Calculate engagement using: Engagement = likes + (comments * 2).
 3. Analyze which 'posted_time' and 'content_type' yield the highest engagement.
 4. Return ONLY a valid JSON object.
-
-OUTPUT FORMAT:
-{
-  "insight": "General trend observation",
-  "evidence": "Specific data points justifying the insight",
-  "recommendation": "Actionable advice for the user"
-}
+answer questions about post performance, best time to post, and content type effectiveness based on the data.
 """
 
 analytics_agent = Agent(
